@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 마이링크 (MyLink & 통계)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="w-full max-w-md text-center">
+        <!-- 프로필 영역 -->
+        <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600 mx-auto mb-4 flex items-center justify-center text-3xl font-bold shadow-lg">💻</div>
+        <h1 class="text-2xl font-bold mb-1">정구원</h1>
+        <p class="text-sm text-slate-400 mb-8">클릭 수가 실시간으로 집계되는 링크 모음입니다.</p>
+
+        <!-- 링크 버튼 목록 (클릭 감지 및 Firestore 카운트 업데이트) -->
+        <div class="space-y-4" id="link-container">
+            <a href="https://github.com" onclick="trackClick('github', event)" target="_blank" class="block bg-slate-800 border border-slate-700 hover:border-blue-500 hover:bg-slate-700 p-4 rounded-xl font-semibold transition shadow">
+                GitHub 프로필
+            </a>
+            <a href="https://velog.io" onclick="trackClick('velog', event)" target="_blank" class="block bg-slate-800 border border-slate-700 hover:border-blue-500 hover:bg-slate-700 p-4 rounded-xl font-semibold transition shadow">
+                기술 블로그
+            </a>
+            <a href="https://notion.so" onclick="trackClick('notion', event)" target="_blank" class="block bg-slate-800 border border-slate-700 hover:border-blue-500 hover:bg-slate-700 p-4 rounded-xl font-semibold transition shadow">
+                포트폴리오 / 이력서
+            </a>
+        </div>
+
+        <!-- 마이페이지 통계 확인 영역 -->
+        <div class="mt-10 p-6 bg-slate-800/50 border border-slate-700 rounded-2xl text-left">
+            <h2 class="text-lg font-bold mb-3 flex items-center gap-2">📊 마이페이지 통계</h2>
+            <div id="stats-container" class="space-y-2 text-sm text-slate-300">
+                <p>데이터를 불러오는 중...</p>
+            </div>
+        </div>
+
+        <footer class="mt-10 text-xs text-slate-500">
+            &copy; 2026 MyLink. All rights reserved.
+        </footer>
+    </div>
+
+    <!-- Firebase SDK (Modular 버전) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // TODO: 본인의 Firebase 콘솔 설정값으로 변경하세요
+        const firebaseConfig = {
+            apiKey: "AIzaSyBiKMTJ_bt_pWeRQ_2h_s51847gb7kNV1M",
+            authDomain: "mylinkclick.firebaseapp.com",
+            projectId: "mylinkclick",
+            storageBucket: "mylinkclick.firebasestorage.app",
+            messagingSenderId: "928390099324",
+            appId: "1:928390099324:web:36e7bc06dfdb65d3c1f4f9",
+            measurementId: "G-CCF84S1TV9"
+        };
+
+        // Firebase 초기화
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // [순서 1 & 2] 링크 클릭 감지 및 Firestore 카운트 업데이트 함수
+        window.trackClick = async function(linkId, event) {
+            // 기본 링크 이동을 잠시 대기 (Firestore 업데이트 완료 후 이동하기 위함)
+            event.preventDefault();
+            const targetUrl = event.currentTarget.href;
+
+            const docRef = doc(db, "link_stats", linkId);
+
+            try {
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    // 문서가 존재하면 카운트 +1 증가
+                    await updateDoc(docRef, {
+                        count: increment(1)
+                    });
+                } else {
+                    // 문서가 없으면 새로 생성 후 카운트 1로 설정
+                    await setDoc(docRef, {
+                        count: 1,
+                        name: linkId
+                    });
+                }
+            } catch (error) {
+                console.error("카운트 업데이트 실패:", error);
+            }
+
+            // 카운트 반영 후 실제 링크로 이동
+            window.open(targetUrl, "_blank");
+            // 통계 화면 즉시 갱신
+            loadStats();
+        }
+
+        // [순서 3] 마이페이지에서 통계 확인 기능
+        async function loadStats() {
+            const statsContainer = document.getElementById("stats-container");
+            statsContainer.innerHTML = "<p class='text-slate-400'>통계 불러오는 중...</p>";
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "link_stats"));
+                let html = "";
+                
+                if (querySnapshot.empty) {
+                    statsContainer.innerHTML = "<p class='text-slate-400'>아직 클릭된 링크가 없습니다.</p>";
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    html += `<div class="flex justify-between items-center bg-slate-800 p-3 rounded-lg">
+                        <span class="font-medium uppercase">${data.name || doc.id}</span>
+                        <span class="bg-blue-600/30 text-blue-400 px-3 py-1 rounded-full font-bold text-xs">${data.count} 회 클릭</span>
+                    </div>`;
+                });
+
+                statsContainer.innerHTML = html;
+            } catch (error) {
+                console.error("통계 로드 실패:", error);
+                statsContainer.innerHTML = "<p class='text-red-400'>통계를 불러오지 못했습니다.</p>";
+            }
+        }
+
+        // 페이지 접속 시 통계 데이터 불러오기 실행
+        loadStats();
+    </script>
+</body>
+</html>
