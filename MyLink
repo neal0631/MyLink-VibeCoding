@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 마이링크 (MyLink)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+        }
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 480px;
+            text-align: center;
+        }
+        .profile-img {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        p {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-bottom: 32px;
+        }
+        .links {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .link-btn {
+            display: block;
+            background-color: #1e293b;
+            color: #f8fafc;
+            text-decoration: none;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            border: 1px solid #334155;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .link-btn:hover {
+            background-color: #334155;
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.2);
+        }
+        footer {
+            margin-top: 40px;
+            font-size: 12px;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 프로필 이니셜 혹은 이모지 (원하는 글자로 수정 가능) -->
+        <div class="profile-img">💻</div>
+        
+        <h1>내 이름 / 닉네임</h1>
+        <p>자주 사용하는 링크 모음 공간입니다.</p>
+
+        <div class="links">
+            <!-- 링크 항목들을 원하는 만큼 복사해서 수정하세요 -->
+            <a href="https://github.com" class="link-btn" target="_blank">GitHub 프로필</a>
+            <a href="https://velog.io" class="link-btn" target="_blank">기술 블로그</a>
+            <a href="https://notion.so" class="link-btn" target="_blank">포트폴리오 / 이력서</a>
+            <a href="mailto:your_email@example.com" class="link-btn">이메일 문의하기</a>
+        </div>
+
+        <footer>
+            &copy; 2026 MyLink. All rights reserved.
+        </footer>
+    </div>
+
+</body>
+</html>
